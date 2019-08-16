@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 
 import Api from '../services/api';
 
@@ -23,14 +23,25 @@ export default class Main extends Component {
     this.setState({ docs });
   };
 
+  renderItem = ({ item }) => (
+    <View>
+      <Text>{item.title}</Text>
+      <Text>{item.description}</Text>
+      <TouchableOpacity onPress={() => {}}>
+        <Text>Acessar</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   render() {
     const { docs } = this.state;
     return (
       <View>
-        <Text>Pagina Main</Text>
-        {docs.map(items => (
-          <Text key={items._id}>{items.title}</Text>
-        ))}
+        <FlatList 
+          data={docs}
+          keyExtractor={item => item._id}
+          renderItem={this.renderItem}
+        />
       </View>
     );
   }
