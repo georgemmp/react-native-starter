@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator
+} from 'react-native';
 
 import Api from '../services/api';
-import { bold } from 'ansi-colors';
 
 export default class Main extends Component {
   static navigationOptions = {
@@ -10,19 +16,38 @@ export default class Main extends Component {
   };
 
   state = {
-    docs: []
+    productInfo: {},
+    docs: [],
+    page: 1,
+    loading: false
   };
 
   componentDidMount() {
     this.loadProducts();
   }
 
-  loadProducts = async () => {
-    const response = await Api.get('/products');
-    const { docs } = response.data;
-    console.log(docs);
-    this.setState({ docs });
+  loadProducts = async (page = 1) => {
+    this.setState({ loading: true });
+    const response = await Api.get(`/products?page=${page}`);
+    const { docs, ...productInfo } = response.data;
+    this.setState({ docs: [...this.state.docs, ...docs], productInfo, page, loading: false });
   };
+
+  loadMore = () => {
+    const { page, productInfo } = this.state;
+    if (page === productInfo.pages) {
+      return;
+    }
+    const pageNumber = page + 1;
+    this.loadProducts(pageNumber);
+  };
+
+  renderFooter = () => (
+    this.state.loading ?
+    <View style={styles.loader}>
+      <ActivityIndicator size="large" />
+    </View> : null
+  );
 
   renderItem = ({ item }) => (
     <View style={styles.productContainer}>
@@ -43,6 +68,9 @@ export default class Main extends Component {
           data={docs}
           keyExtractor={item => item._id}
           renderItem={this.renderItem}
+          onEndReached={this.loadMore}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={this.renderFooter}
         />
       </View>
     );
@@ -52,7 +80,7 @@ export default class Main extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#fafafa'
   },
   list: {
     padding: 20
@@ -90,5 +118,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#DA552F',
     fontWeight: 'bold'
+  },
+  loader: {
+    alignItems: 'center',
+    marginBottom: 20
   }
 });
