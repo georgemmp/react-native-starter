@@ -30,7 +30,12 @@ export default class Main extends Component {
     this.setState({ loading: true });
     const response = await Api.get(`/products?page=${page}`);
     const { docs, ...productInfo } = response.data;
-    this.setState({ docs: [...this.state.docs, ...docs], productInfo, page, loading: false });
+    this.setState({
+      docs: [...this.state.docs, ...docs],
+      productInfo,
+      page,
+      loading: false
+    });
   };
 
   loadMore = () => {
@@ -42,18 +47,24 @@ export default class Main extends Component {
     this.loadProducts(pageNumber);
   };
 
-  renderFooter = () => (
-    this.state.loading ?
-    <View style={styles.loader}>
-      <ActivityIndicator size="large" />
-    </View> : null
-  );
+  renderFooter = () =>
+    this.state.loading ? (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" />
+      </View>
+    ) : null;
 
   renderItem = ({ item }) => (
     <View style={styles.productContainer}>
       <Text style={styles.productTitle}>{item.title}</Text>
       <Text style={styles.productDescription}>{item.description}</Text>
-      <TouchableOpacity style={styles.productButton} onPress={() => {}}>
+      <TouchableOpacity
+        style={styles.productButton}
+        onPress={() => {
+          this.props.navigation.navigate('Product', { item });
+        }}
+        title={item.tile}
+      >
         <Text style={styles.productButtonText}>Acessar</Text>
       </TouchableOpacity>
     </View>
